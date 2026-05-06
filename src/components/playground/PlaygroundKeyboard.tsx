@@ -30,7 +30,7 @@ interface Props {
   onCopyLayout: () => void;
 }
 
-const key_css = "border border-[#555] rounded-lg text-center leading-7 select-none pb-2 pt-1 cursor-default touch-none";
+const key_css = "border border-[#555] rounded-[1.4cqw] text-center select-none pt-[2.8cqw] pb-[3.6cqw] cursor-default touch-none";
 
 interface KeyTileProps {
   index: number;
@@ -138,10 +138,11 @@ export default function PlaygroundKeyboard(props: Props) {
     <DragDropProvider onDragEnd={handleDragEnd}>
       <DragDropSensors>
         <div
-          class="mx-auto w-full max-w-2xl bg-[#444] rounded-lg p-1.5 text-xl sm:text-2xl md:text-3xl overflow-hidden cursor-pointer"
+          class="mx-auto w-full max-w-2xl bg-[#444] rounded-[1.5cqw] p-[0.8cqw] overflow-hidden cursor-pointer"
+          style={{ 'container-type': 'inline-size' }}
           onClick={props.onCopyLayout}
         >
-          <div class="grid grid-cols-11 gap-0.5">
+          <div class="grid grid-cols-11 gap-[0.4cqw]" style={{ 'font-size': '4.2cqw', 'line-height': '0' }}>
             <For each={[0, 1, 2]}>
               {(row) => (
                 <>
