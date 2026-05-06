@@ -1,23 +1,37 @@
-import { Dof, Finger } from 'libdof';
-import type { Key } from 'libdof';
+import { Dof, Finger } from "libdof";
+import type { Key } from "libdof";
 
-export { Dof } from 'libdof';
+export { Dof } from "libdof";
 
 export const FINGER_LABELS: Record<number, string> = {
-  [Finger.LP]: '0', [Finger.LR]: '1', [Finger.LM]: '2', [Finger.LI]: '3',
-  [Finger.LT]: 'thumbL', [Finger.RT]: 'thumbR',
-  [Finger.RI]: '6', [Finger.RM]: '7', [Finger.RR]: '8', [Finger.RP]: '9',
+  [Finger.LP]: "0",
+  [Finger.LR]: "1",
+  [Finger.LM]: "2",
+  [Finger.LI]: "3",
+  [Finger.LT]: "thumbL",
+  [Finger.RT]: "thumbR",
+  [Finger.RI]: "6",
+  [Finger.RM]: "7",
+  [Finger.RR]: "8",
+  [Finger.RP]: "9",
 };
 
 export function dofMainChars(dof: Dof): string[] {
-  return dof.main_layer().keys().map(k => k.char_output() ?? '~');
+  return dof
+    .main_layer()
+    .keys()
+    .map((k) => k.char_output() ?? "~");
 }
 
 export function dofToLayoutString(dof: Dof, thumbKeys: string): string {
-  return dofMainChars(dof).join('') + thumbKeys;
+  return dofMainChars(dof).join("") + thumbKeys;
 }
 
-export function dofToLayoutMap(dof: Dof, thumbKeys: string, excludedChars: Set<string>): Record<string, number> {
+export function dofToLayoutMap(
+  dof: Dof,
+  thumbKeys: string,
+  excludedChars: Set<string>,
+): Record<string, number> {
   const map: Record<string, number> = {};
   const shape = dof.shape() as number[];
   const layer = dof.main_layer();
@@ -42,7 +56,11 @@ export function dofToLayoutMap(dof: Dof, thumbKeys: string, excludedChars: Set<s
   return map;
 }
 
-export function dofFingerGroups(dof: Dof, thumbKeys: string, excludedChars: Set<string>): Record<number, Set<string>> {
+export function dofFingerGroups(
+  dof: Dof,
+  thumbKeys: string,
+  excludedChars: Set<string>,
+): Record<number, Set<string>> {
   const groups: Record<number, Set<string>> = {};
   for (let i = 0; i <= 9; i++) groups[i] = new Set();
 
@@ -60,7 +78,7 @@ export function dofFingerGroups(dof: Dof, thumbKeys: string, excludedChars: Set<
   }
 
   // Backtick is conventionally included with LP (left pinky), matching original analyzer behavior
-  groups[Finger.LP].add('`');
+  groups[Finger.LP].add("`");
 
   for (let i = 0; i < 3; i++) {
     const lch = thumbKeys[i];
@@ -73,7 +91,7 @@ export function dofFingerGroups(dof: Dof, thumbKeys: string, excludedChars: Set<
 }
 
 export function swapAndRebuild(dof: Dof, r1: number, c1: number, r2: number, c2: number): Dof {
-  dof.swap('main', r1, c1, 'main', r2, c2);
+  dof.swap("main", r1, c1, "main", r2, c2);
   return new Dof(dof.serialize());
 }
 

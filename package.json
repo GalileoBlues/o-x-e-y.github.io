@@ -28,5 +28,9 @@
     "@thisbeyond/solid-dnd": "^0.7.5",
     "libdof": "0.24.1",
     "solid-js": "^1.9.5"
-  }
+  },
+  "prettier": {
+      "singleQuote": false,
+      "printWidth": 100
+    }
 }
