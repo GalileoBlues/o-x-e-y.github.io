@@ -1,9 +1,9 @@
 import LayoutPage from '../../components/LayoutPage';
-import { keys, stats } from '../../data/dvarf';
+import { stats } from '../../data/dvarf';
 
 export default function Dvarf() {
   return (
-    <LayoutPage name="Dvarf" keys={keys} stats={stats}>
+    <LayoutPage name="Dvarf" layoutFile="dvarf" stats={stats}>
       <h2>Description</h2>
       <section>
         <p>

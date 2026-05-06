@@ -1,8 +1,9 @@
 import { createSignal, For, Show } from 'solid-js';
 import layout_names from '../../data/layout_names';
+import { Dof, dofMainChars } from '../../lib/dof-utils';
 
 interface Props {
-  onSelect: (_layout: string, _language: string) => void;
+  onSelect: (_dof: Dof, _thumbKeys: string, _language: string) => void;
 }
 
 function* getTrigrams(str: string): Generator<string> {
@@ -41,11 +42,14 @@ export default function LayoutSearch(props: Props) {
   const selectLayout = async (name: string) => {
     setResults([]);
     setQuery('');
-    const res = await fetch(`/stored_layouts/${name}.json`);
-    const obj = await res.json();
-    let layout: string = obj.layout;
-    layout += layout.includes('/') ? '=;␣⇧⇯-' : '=/␣⇧⇯-';
-    props.onSelect(layout, obj.for_language);
+    const res = await fetch(`/stored_layouts/${name}.dof`);
+    const text = await res.text();
+    const dof = new Dof(text);
+    const language = (dof.languages() as string[])[0] ?? 'english';
+    const mainChars = dofMainChars(dof);
+    const hasSlash = mainChars.includes('/');
+    const thumbKeys = hasSlash ? `=;\u2423\u21E7\u21EF-` : `=/\u2423\u21E7\u21EF-`;
+    props.onSelect(dof, thumbKeys, language);
   };
 
   return (

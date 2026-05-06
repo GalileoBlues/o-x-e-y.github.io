@@ -1,9 +1,9 @@
 import LayoutPage from '../../components/LayoutPage';
-import { keys, stats } from '../../data/crest';
+import { stats } from '../../data/crest';
 
 export default function Crest() {
   return (
-    <LayoutPage name="Crest" keys={keys} stats={stats}>
+    <LayoutPage name="Crest" layoutFile="crest" stats={stats}>
       <h2>Description</h2>
       <section>
         <p>

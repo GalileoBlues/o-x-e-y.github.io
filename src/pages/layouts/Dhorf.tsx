@@ -1,9 +1,9 @@
 import LayoutPage from '../../components/LayoutPage';
-import { keys, stats } from '../../data/dhorf';
+import { stats } from '../../data/dhorf';
 
 export default function Dhorf() {
   return (
-    <LayoutPage name="Dhorf" keys={keys} stats={stats}>
+    <LayoutPage name="Dhorf" layoutFile="dhorf" stats={stats}>
       <h2>Description</h2>
       <section>
         <p>

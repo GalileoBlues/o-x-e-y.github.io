@@ -1,9 +1,9 @@
 import LayoutPage from '../../components/LayoutPage';
-import { keys, stats } from '../../data/sturdy';
+import { stats } from '../../data/sturdy';
 
 export default function Sturdy() {
   return (
-    <LayoutPage name="Sturdy" keys={keys} stats={stats}>
+    <LayoutPage name="Sturdy" layoutFile="sturdy" stats={stats}>
       <h2>Description</h2>
       <section>
         <p>

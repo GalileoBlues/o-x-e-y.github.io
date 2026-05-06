@@ -1,9 +1,9 @@
 import LayoutPage from '../../components/LayoutPage';
-import { keys, stats } from '../../data/hands_up';
+import { stats } from '../../data/hands_up';
 
 export default function HandsUp() {
   return (
-    <LayoutPage name="Hands Up" keys={keys} stats={stats}>
+    <LayoutPage name="Hands Up" layoutFile="hands up" stats={stats}>
       <h2>Description</h2>
       <section>
         <p>

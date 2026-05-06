@@ -1,4 +1,6 @@
 import TRIGRAM_COMBINATIONS from './trigram_patterns';
+import type { Dof } from './dof-utils';
+import { FINGER_LABELS, dofToLayoutString, dofToLayoutMap, dofFingerGroups } from './dof-utils';
 
 export interface LanguageData {
   language: string;
@@ -137,6 +139,59 @@ export function analyzeLayout(layout: string, excludedKeys: Set<string>, ld: Lan
     fingerSfb,
     dsfbTotal,
     lsbTotal: getLsbs(layout, excludedKeys, ld.bigrams),
+    trigramFreqs: getTrigramStats(ld.trigrams, layoutMap),
+  };
+}
+
+export function analyzeLayoutDof(dof: Dof, thumbKeys: string, excludedChars: Set<string>, ld: LanguageData): AnalysisResult {
+  const shape = dof.shape() as number[];
+  const layer = dof.main_layer();
+  const groups = dofFingerGroups(dof, thumbKeys, excludedChars);
+
+  const fingerUsage: Record<string, number> = {};
+  const fingerSfb: Record<string, number> = {};
+  for (const [fi, chars] of Object.entries(groups)) {
+    const label = FINGER_LABELS[parseInt(fi)];
+    fingerUsage[label] = getFingerUsage(chars, ld.characters);
+    fingerSfb[label] = getSfbForFinger(chars, ld.bigrams);
+  }
+
+  const centerLeft = new Set<string>();
+  const centerRight = new Set<string>();
+  const homerow = new Set<string>();
+  for (let r = 0; r < shape.length; r++) {
+    const cols = shape[r];
+    const midL = Math.floor(cols / 2) - 1;
+    const midR = Math.floor(cols / 2);
+    const lch = (layer.get_key(r, midL) as { char_output?: () => string | undefined } | undefined)?.char_output?.();
+    const rch = (layer.get_key(r, midR) as { char_output?: () => string | undefined } | undefined)?.char_output?.();
+    if (lch) centerLeft.add(lch);
+    if (rch) centerRight.add(rch);
+    if (r === 1) {
+      for (let c = 0; c < cols; c++) {
+        if (c === midL || c === midR) continue;
+        const ch = (layer.get_key(1, c) as { char_output?: () => string | undefined } | undefined)?.char_output?.();
+        if (ch && !excludedChars.has(ch)) homerow.add(ch);
+      }
+    }
+  }
+
+  let dsfbTotal = 0;
+  for (const chars of Object.values(groups)) dsfbTotal += getSfbForFinger(chars, ld.skipgrams);
+
+  const layoutStr = dofToLayoutString(dof, thumbKeys);
+  const layoutMap = dofToLayoutMap(dof, thumbKeys, excludedChars);
+
+  return {
+    fingerUsage,
+    centerUsage: {
+      left: getFingerUsage(centerLeft, ld.characters),
+      right: getFingerUsage(centerRight, ld.characters),
+      homerow: getFingerUsage(homerow, ld.characters),
+    },
+    fingerSfb,
+    dsfbTotal,
+    lsbTotal: getLsbs(layoutStr, excludedChars, ld.bigrams),
     trigramFreqs: getTrigramStats(ld.trigrams, layoutMap),
   };
 }

@@ -8,6 +8,8 @@ import {
 } from '@thisbeyond/solid-dnd';
 import { keyColor } from '../../lib/analyzer';
 import type { LanguageData } from '../../lib/analyzer';
+import { Dof, swapAndRebuild } from '../../lib/dof-utils';
+import type { Key } from 'libdof';
 
 // Teach TypeScript about use:draggable / use:droppable directives
 /* eslint-disable no-unused-vars */
@@ -22,8 +24,10 @@ declare module 'solid-js' {
 /* eslint-enable no-unused-vars */
 
 interface Props {
-  layout: Accessor<string>;
-  setLayout: Setter<string>;
+  dof: Accessor<Dof | null>;
+  setDof: Setter<Dof | null>;
+  thumbKeys: Accessor<string>;
+  setThumbKeys: Setter<string>;
   excludedIndices: Accessor<Set<number>>;
   setExcludedIndices: Setter<Set<number>>;
   languageData: Accessor<LanguageData | null>;
@@ -92,12 +96,26 @@ const KeyTile = (props: KeyTileProps) => {
 };
 
 export default function PlaygroundKeyboard(props: Props) {
+  const getKeyChar = (i: number): string => {
+    const dof = props.dof();
+    if (i >= 30) return props.thumbKeys()[i - 30] ?? '';
+    if (!dof) return '?';
+    const row = Math.floor(i / 10);
+    const col = i % 10;
+    return (dof.main_layer().get_key(row, col) as Key | undefined)?.char_output?.() ?? '~';
+  };
+
   const getKeyStyle = (i: number) => {
     const opacity = props.excludedIndices().has(i) ? '0.33' : '1.0';
     const ld = props.languageData();
     if (!ld) return { 'background-color': 'rgb(86, 124, 126)', opacity };
-    const prevalence = ld.characters[props.layout()[i]] ?? 0;
+    const prevalence = ld.characters[getKeyChar(i)] ?? 0;
     return { 'background-color': keyColor(prevalence), opacity };
+  };
+
+  const getKeyTitle = (i: number): string => {
+    const ch = getKeyChar(i);
+    return `Key usage: ${((props.languageData()?.characters[ch] ?? 0) * 100).toFixed(2)}%`;
   };
 
   const toggleExclude = (i: number) => {
@@ -112,11 +130,19 @@ export default function PlaygroundKeyboard(props: Props) {
     if (!droppable || draggable.id === droppable.id) return;
     const si = draggable.id;
     const ei = droppable.id;
-    props.setLayout(prev => {
-      const arr = [...prev];
-      [arr[si], arr[ei]] = [arr[ei], arr[si]];
-      return arr.join('');
-    });
+
+    if (si < 30 && ei < 30) {
+      const sr = Math.floor(si / 10), sc = si % 10;
+      const er = Math.floor(ei / 10), ec = ei % 10;
+      props.setDof(prev => prev ? swapAndRebuild(prev, sr, sc, er, ec) : prev);
+    } else if (si >= 30 && ei >= 30) {
+      props.setThumbKeys(prev => {
+        const arr = [...prev];
+        [arr[si - 30], arr[ei - 30]] = [arr[ei - 30], arr[si - 30]];
+        return arr.join('');
+      });
+    }
+
     props.setExcludedIndices(prev => {
       const startEx = prev.has(si);
       const endEx = prev.has(ei);
@@ -131,9 +157,9 @@ export default function PlaygroundKeyboard(props: Props) {
   const renderKey = (i: number) => (
     <KeyTile
       index={i}
-      char={() => props.layout()[i]}
+      char={() => getKeyChar(i)}
       style={() => getKeyStyle(i)}
-      title={() => `Key usage: ${((props.languageData()?.characters[props.layout()[i]] ?? 0) * 100).toFixed(2)}%`}
+      title={() => getKeyTitle(i)}
       onToggleExclude={toggleExclude}
     />
   );

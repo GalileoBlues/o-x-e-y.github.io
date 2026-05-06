@@ -1,10 +1,10 @@
 import { A } from '@solidjs/router';
 import LayoutPage from '../../components/LayoutPage';
-import { keys, stats } from '../../data/noctum';
+import { stats } from '../../data/noctum';
 
 export default function Noctum() {
   return (
-    <LayoutPage name="Noctum" keys={keys} stats={stats}>
+    <LayoutPage name="Noctum" layoutFile="noctum" stats={stats}>
       <h2>Description</h2>
       <section>
         <p>

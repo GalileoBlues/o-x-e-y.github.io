@@ -1,10 +1,10 @@
 import { A } from '@solidjs/router';
 import LayoutPage from '../../components/LayoutPage';
-import { keys, stats } from '../../data/stronk';
+import { stats } from '../../data/stronk';
 
 export default function Stronk() {
   return (
-    <LayoutPage name="Stronk" keys={keys} stats={stats}>
+    <LayoutPage name="Stronk" layoutFile="stronk" stats={stats}>
       <h2>Description</h2>
       <section>
         <p>

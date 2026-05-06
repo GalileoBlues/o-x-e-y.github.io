@@ -1,10 +1,10 @@
 import { A } from '@solidjs/router';
 import LayoutPage from '../../components/LayoutPage';
-import { keys, stats } from '../../data/compound';
+import { stats } from '../../data/compound';
 
 export default function Compound() {
   return (
-    <LayoutPage name="Compound" keys={keys} stats={stats}>
+    <LayoutPage name="Compound" layoutFile="compound" stats={stats}>
       <h2>Description</h2>
       <section>
         <p>
