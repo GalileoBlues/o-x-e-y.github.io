@@ -1,6 +1,7 @@
 import { createSignal, For, Show } from "solid-js";
 import layout_names from "../../data/layout_names";
-import { Dof, dofMainChars } from "../../lib/dof-utils";
+import { Dof, dofMainChars, DEFAULT_THUMB_KEYS } from "../../lib/dof-utils";
+import { Language } from "libdof";
 
 interface Props {
   onSelect: (_dof: Dof, _thumbKeys: string, _language: string) => void;
@@ -45,11 +46,8 @@ export default function LayoutSearch(props: Props) {
     const res = await fetch(`/stored_layouts/${name}.dof`);
     const text = await res.text();
     const dof = new Dof(text);
-    const language = (dof.languages() as string[])[0] ?? "english";
-    const mainChars = dofMainChars(dof);
-    const hasSlash = mainChars.includes("/");
-    const thumbKeys = hasSlash ? `=;\u2423\u21E7\u21EF-` : `=/\u2423\u21E7\u21EF-`;
-    props.onSelect(dof, thumbKeys, language);
+    const language = (dof.languages() as Language[])[0];
+    props.onSelect(dof, DEFAULT_THUMB_KEYS, language.language);
   };
 
   return (

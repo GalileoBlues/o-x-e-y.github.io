@@ -8,7 +8,8 @@
 		"main": [
 			". , ; i r h w g p q",
 			"' a y e s n t m v j",
-			"x o u b l d c f k z"
+			"x o u b l d c f k z",
+			"    = / ␣ ⇑ ↻ -    "
 		]
 	},
 	"fingering": "traditional",

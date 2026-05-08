@@ -35,6 +35,7 @@ interface Props {
 }
 
 const GAP = 0.2;
+const Y_SCALE = 1.0;
 
 const key_css =
   "w-full h-full border border-[#555] rounded-[12%] flex items-center justify-center select-none cursor-default touch-none";
@@ -123,8 +124,8 @@ export default function PlaygroundKeyboard(props: Props) {
     const dx = maxX - minX;
     const dy = maxY - minY;
     const kw = 100 / dx;
-    const ym = dx / dy;
-    const heightCss = dy * kw;
+    const ym = (dx / dy) * Y_SCALE;
+    const heightCss = dy * kw * Y_SCALE;
     const fontSizeCqw = kw / 2.5;
     return { kw, ym, heightCss, fontSizeCqw, minX, minY, board };
   });
@@ -262,7 +263,7 @@ export default function PlaygroundKeyboard(props: Props) {
                   {/* Thumb row */}
                   <div
                     class="grid grid-cols-11 gap-[0.4cqw] mt-[0.4cqw]"
-                    style={{ "line-height": "0" }}
+                    style={{ "font-size": `${geom().fontSizeCqw.toFixed(2)}cqw`, "line-height": "0" }}
                   >
                     <div />
                     <div />

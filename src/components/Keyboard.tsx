@@ -10,6 +10,7 @@ interface Props {
 }
 
 const GAP = 0.2;
+const Y_SCALE = 1.0;
 
 const key_css =
   "absolute border border-[#555] rounded-[12%] flex items-center justify-center select-none cursor-default touch-none";
@@ -31,8 +32,8 @@ export default function Keyboard(props: Props) {
     const dx = maxX - minX;
     const dy = maxY - minY;
     const kw = 100 / dx;
-    const ym = dx / dy;
-    const heightCss = dy * kw;
+    const ym = (dx / dy) * Y_SCALE;
+    const heightCss = dy * kw * Y_SCALE;
     const fontSizeCqw = kw / 2.5;
     return { kw, ym, heightCss, fontSizeCqw, minX, minY, board };
   });

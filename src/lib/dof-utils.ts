@@ -3,6 +3,8 @@ import type { Key } from "libdof";
 
 export { Dof } from "libdof";
 
+export const DEFAULT_THUMB_KEYS = "=/␣⇑↻-";
+
 export const FINGER_LABELS: Record<number, string> = {
   [Finger.LP]: "0",
   [Finger.LR]: "1",
@@ -33,7 +35,7 @@ export function dofToLayoutMap(
   excludedChars: Set<string>,
 ): Record<string, number> {
   const map: Record<string, number> = {};
-  const shape = dof.shape() as number[];
+  const shape = dof.shape();
   const layer = dof.main_layer();
 
   for (let r = 0; r < shape.length; r++) {
@@ -64,7 +66,7 @@ export function dofFingerGroups(
   const groups: Record<number, Set<string>> = {};
   for (let i = 0; i <= 9; i++) groups[i] = new Set();
 
-  const shape = dof.shape() as number[];
+  const shape = dof.shape();
   const layer = dof.main_layer();
 
   for (let r = 0; r < shape.length; r++) {

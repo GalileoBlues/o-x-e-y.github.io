@@ -4,11 +4,10 @@ import LayoutSearch from "../components/playground/LayoutSearch";
 import AnalysisPanel from "../components/playground/AnalysisPanel";
 import { analyzeLayoutDof } from "../lib/analyzer";
 import type { LanguageData, AnalysisResult } from "../lib/analyzer";
-import { Dof, dofToLayoutString } from "../lib/dof-utils";
+import { Dof, dofToLayoutString, DEFAULT_THUMB_KEYS } from "../lib/dof-utils";
 import HomeButton from "../components/HomeButton";
 
 const DEFAULT_LAYOUT_STRING = "vmlcpqfoujstrdy.naeizkxgwbh';,";
-const DEFAULT_THUMB_KEYS = `=/\u2423\u21E7\u21EF-`;
 
 const LANGUAGES: { label: string; value: string }[] = [
   { label: "English", value: "english" },
