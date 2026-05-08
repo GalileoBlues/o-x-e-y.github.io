@@ -1,5 +1,6 @@
 import TRIGRAM_COMBINATIONS from "./trigram_patterns";
 import type { Dof } from "./dof-utils";
+import type { Key } from "libdof";
 import { FINGER_LABELS, dofToLayoutString, dofToLayoutMap, dofFingerGroups } from "./dof-utils";
 
 export interface LanguageData {
@@ -217,20 +218,14 @@ export function analyzeLayoutDof(
     const cols = shape[r];
     const midL = Math.floor(cols / 2) - 1;
     const midR = Math.floor(cols / 2);
-    const lch = (
-      layer.get_key(r, midL) as { char_output?: () => string | undefined } | undefined
-    )?.char_output?.();
-    const rch = (
-      layer.get_key(r, midR) as { char_output?: () => string | undefined } | undefined
-    )?.char_output?.();
+    const lch = (layer.get_key(r, midL) as Key | undefined)?.char_output();
+    const rch = (layer.get_key(r, midR) as Key | undefined)?.char_output();
     if (lch) centerLeft.add(lch);
     if (rch) centerRight.add(rch);
     if (r === 1) {
       for (let c = 0; c < cols; c++) {
         if (c === midL || c === midR) continue;
-        const ch = (
-          layer.get_key(1, c) as { char_output?: () => string | undefined } | undefined
-        )?.char_output?.();
+        const ch = (layer.get_key(1, c) as Key | undefined)?.char_output();
         if (ch && !excludedChars.has(ch)) homerow.add(ch);
       }
     }

@@ -39,7 +39,7 @@ export function dofToLayoutMap(
   for (let r = 0; r < shape.length; r++) {
     for (let c = 0; c < shape[r]; c++) {
       const key = layer.get_key(r, c) as Key | undefined;
-      const ch = key?.char_output?.();
+      const ch = key?.char_output();
       if (!ch || excludedChars.has(ch)) continue;
       const finger = dof.finger(r, c);
       if (finger !== undefined) map[ch] = finger as unknown as number;
@@ -70,7 +70,7 @@ export function dofFingerGroups(
   for (let r = 0; r < shape.length; r++) {
     for (let c = 0; c < shape[r]; c++) {
       const key = layer.get_key(r, c) as Key | undefined;
-      const ch = key?.char_output?.();
+      const ch = key?.char_output();
       if (!ch || excludedChars.has(ch)) continue;
       const finger = dof.finger(r, c);
       if (finger !== undefined) groups[finger as unknown as number]?.add(ch);

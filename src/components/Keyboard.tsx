@@ -14,7 +14,7 @@ const key_css =
 
 export default function Keyboard(props: Props) {
   const getChar = (row: number, col: number): string =>
-    (props.dof.main_layer().get_key(row, col) as Key | undefined)?.char_output?.() ?? "~";
+    (props.dof.main_layer().get_key(row, col) as Key | undefined)?.char_output() ?? "~";
 
   const getColor = (row: number, col: number): string => {
     const ch = getChar(row, col);
