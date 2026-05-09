@@ -1,4 +1,4 @@
-import { For, onCleanup } from "solid-js";
+import { For, Show, createMemo, onCleanup } from "solid-js";
 import type { Accessor, Setter } from "solid-js";
 import {
   DragDropProvider,
@@ -8,8 +8,14 @@ import {
 } from "@thisbeyond/solid-dnd";
 import { keyColor } from "../../lib/analyzer";
 import type { LanguageData } from "../../lib/analyzer";
-import { Dof, swapAndRebuild } from "../../lib/dof-utils";
-import type { Key } from "libdof";
+import {
+  Dof,
+  swapAndRebuild,
+  flatToRowCol,
+  rowColToFlat,
+  totalMainKeys,
+} from "../../lib/dof-utils";
+import type { Key, PhysicalKey } from "libdof";
 
 // Teach TypeScript about use:draggable / use:droppable directives
 /* eslint-disable no-unused-vars */
@@ -26,16 +32,16 @@ declare module "solid-js" {
 interface Props {
   dof: Accessor<Dof | null>;
   setDof: Setter<Dof | null>;
-  thumbKeys: Accessor<string>;
-  setThumbKeys: Setter<string>;
   excludedIndices: Accessor<Set<number>>;
   setExcludedIndices: Setter<Set<number>>;
   languageData: Accessor<LanguageData | null>;
   onCopyLayout: () => void;
 }
 
+const GAP = 0.2;
+
 const key_css =
-  "border border-[#555] rounded-[1.4cqw] text-center select-none pt-[2.8cqw] pb-[3.6cqw] cursor-default touch-none";
+  "w-full h-full border border-[#555] rounded-[12%] flex items-center justify-center select-none cursor-default touch-none";
 
 interface KeyTileProps {
   index: number;
@@ -103,14 +109,39 @@ const KeyTile = (props: KeyTileProps) => {
 };
 
 export default function PlaygroundKeyboard(props: Props) {
+  const boardGeom = createMemo(() => {
+    const dof = props.dof();
+    if (!dof) return null;
+    const rawBoard = dof.board() as PhysicalKey[][];
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    const board = rawBoard.map((row) =>
+      row.map((pk) => ({ x: pk.x, y: pk.y, width: pk.width, height: pk.height })),
+    );
+    for (const row of board)
+      for (const k of row) {
+        minX = Math.min(minX, k.x);
+        minY = Math.min(minY, k.y);
+        maxX = Math.max(maxX, k.x + k.width);
+        maxY = Math.max(maxY, k.y + k.height);
+      }
+    const dx = maxX - minX;
+    const dy = maxY - minY;
+    const kw = 100 / dx;
+    const ym = dx / dy;
+    const heightCss = dy * kw;
+    const fontSizeCqw = kw / 2.25;
+    return { kw, ym, heightCss, fontSizeCqw, minX, minY, board };
+  });
+
   const getKeyChar = (i: number): string => {
     const dof = props.dof();
-    if (i >= 30) return props.thumbKeys()[i - 30] ?? "";
     if (!dof) return "?";
-    const row = Math.floor(i / 10);
-    const col = i % 10;
-    let key = dof.main_layer().get_key(row, col) as Key | undefined;
-    return key?.char_output() ?? "~";
+    const shape = Array.from(dof.shape());
+    const [row, col] = flatToRowCol(i, shape);
+    return (dof.main_layer().get_key(row, col) as Key | undefined)?.char_output() ?? "~";
   };
 
   const getKeyStyle = (i: number) => {
@@ -145,20 +176,12 @@ export default function PlaygroundKeyboard(props: Props) {
     if (!droppable || draggable.id === droppable.id) return;
     const si = draggable.id;
     const ei = droppable.id;
-
-    if (si < 30 && ei < 30) {
-      const sr = Math.floor(si / 10),
-        sc = si % 10;
-      const er = Math.floor(ei / 10),
-        ec = ei % 10;
-      props.setDof((prev) => (prev ? swapAndRebuild(prev, sr, sc, er, ec) : prev));
-    } else if (si >= 30 && ei >= 30) {
-      props.setThumbKeys((prev) => {
-        const arr = [...prev];
-        [arr[si - 30], arr[ei - 30]] = [arr[ei - 30], arr[si - 30]];
-        return arr.join("");
-      });
-    }
+    const dof = props.dof();
+    if (!dof) return;
+    const shape = Array.from(dof.shape());
+    const [sr, sc] = flatToRowCol(si, shape);
+    const [er, ec] = flatToRowCol(ei, shape);
+    props.setDof((prev) => (prev ? swapAndRebuild(prev, sr, sc, er, ec) : prev));
 
     props.setExcludedIndices((prev) => {
       const startEx = prev.has(si);
@@ -190,36 +213,48 @@ export default function PlaygroundKeyboard(props: Props) {
     <DragDropProvider onDragEnd={handleDragEnd}>
       <DragDropSensors>
         <div
-          class="mx-auto w-full max-w-2xl bg-[#444] rounded-[1.5cqw] p-[0.8cqw] overflow-hidden cursor-pointer"
+          class="mx-auto w-full max-w-lg bg-[#444] rounded-[1.5cqw] p-[0.8cqw] overflow-hidden cursor-pointer"
           style={{ "container-type": "inline-size" }}
           onClick={props.onCopyLayout}
         >
-          <div
-            class="grid grid-cols-11 gap-[0.4cqw]"
-            style={{ "font-size": "4.2cqw", "line-height": "0" }}
-          >
-            <For each={[0, 1, 2]}>
-              {(row) => (
-                <>
-                  <For each={[0, 1, 2, 3, 4]}>{(col) => renderKey(row * 10 + col)}</For>
-                  <div />
-                  <For each={[5, 6, 7, 8, 9]}>{(col) => renderKey(row * 10 + col)}</For>
-                </>
-              )}
-            </For>
-            {/* Thumb row */}
-            <div />
-            <div />
-            {renderKey(30)}
-            {renderKey(31)}
-            {renderKey(32)}
-            <div />
-            {renderKey(33)}
-            {renderKey(34)}
-            {renderKey(35)}
-            <div />
-            <div />
-          </div>
+          <Show when={boardGeom()}>
+            {(geom) => {
+              const shape = Array.from(props.dof()!.shape());
+              const total = totalMainKeys(shape);
+              return (
+                <div
+                  class="relative w-full"
+                  style={{
+                    "aspect-ratio": `100 / ${geom().heightCss}`,
+                    "font-size": `${geom().fontSizeCqw.toFixed(2)}cqw`,
+                    "line-height": "0",
+                  }}
+                >
+                  <For each={Array.from({ length: total }, (_, i) => i)}>
+                    {(flatIdx) => {
+                      const { kw, ym, minX, minY } = geom();
+                      const [r, c] = flatToRowCol(flatIdx, shape);
+                      const pk = geom().board[r]?.[c];
+                      if (!pk) return null;
+                      return (
+                        <div
+                          class="absolute"
+                          style={{
+                            left: `${(pk.x - minX) * kw + GAP}%`,
+                            top: `${(pk.y - minY) * kw * ym + GAP * ym}%`,
+                            width: `${pk.width * kw - GAP * 2}%`,
+                            height: `${(pk.height * kw - GAP * 2) * ym}%`,
+                          }}
+                        >
+                          {renderKey(flatIdx)}
+                        </div>
+                      );
+                    }}
+                  </For>
+                </div>
+              );
+            }}
+          </Show>
         </div>
       </DragDropSensors>
     </DragDropProvider>

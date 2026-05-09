@@ -23,17 +23,13 @@ export function dofMainChars(dof: Dof): string[] {
     .map((k) => k.char_output() ?? "~");
 }
 
-export function dofToLayoutString(dof: Dof, thumbKeys: string): string {
-  return dofMainChars(dof).join("") + thumbKeys;
+export function dofToLayoutString(dof: Dof): string {
+  return dofMainChars(dof).join("");
 }
 
-export function dofToLayoutMap(
-  dof: Dof,
-  thumbKeys: string,
-  excludedChars: Set<string>,
-): Record<string, number> {
+export function dofToLayoutMap(dof: Dof, excludedChars: Set<string>): Record<string, number> {
   const map: Record<string, number> = {};
-  const shape = dof.shape() as number[];
+  const shape = dof.shape();
   const layer = dof.main_layer();
 
   for (let r = 0; r < shape.length; r++) {
@@ -46,25 +42,14 @@ export function dofToLayoutMap(
     }
   }
 
-  for (let i = 0; i < 3; i++) {
-    const lch = thumbKeys[i];
-    const rch = thumbKeys[i + 3];
-    if (lch && !excludedChars.has(lch)) map[lch] = Finger.LT;
-    if (rch && !excludedChars.has(rch)) map[rch] = Finger.RT;
-  }
-
   return map;
 }
 
-export function dofFingerGroups(
-  dof: Dof,
-  thumbKeys: string,
-  excludedChars: Set<string>,
-): Record<number, Set<string>> {
+export function dofFingerGroups(dof: Dof, excludedChars: Set<string>): Record<number, Set<string>> {
   const groups: Record<number, Set<string>> = {};
   for (let i = 0; i <= 9; i++) groups[i] = new Set();
 
-  const shape = dof.shape() as number[];
+  const shape = dof.shape();
   const layer = dof.main_layer();
 
   for (let r = 0; r < shape.length; r++) {
@@ -80,13 +65,6 @@ export function dofFingerGroups(
   // Backtick is conventionally included with LP (left pinky), matching original analyzer behavior
   groups[Finger.LP].add("`");
 
-  for (let i = 0; i < 3; i++) {
-    const lch = thumbKeys[i];
-    const rch = thumbKeys[i + 3];
-    if (lch && !excludedChars.has(lch)) groups[Finger.LT].add(lch);
-    if (rch && !excludedChars.has(rch)) groups[Finger.RT].add(rch);
-  }
-
   return groups;
 }
 
@@ -100,4 +78,23 @@ export async function loadDof(name: string): Promise<Dof> {
   if (!res.ok) throw new Error(`Failed to load layout: ${name}`);
   const text = await res.text();
   return new Dof(text);
+}
+
+export function totalMainKeys(shape: number[]): number {
+  return shape.reduce((s, n) => s + n, 0);
+}
+
+export function flatToRowCol(i: number, shape: number[]): [number, number] {
+  let rem = i;
+  for (let r = 0; r < shape.length; r++) {
+    if (rem < shape[r]) return [r, rem];
+    rem -= shape[r];
+  }
+  return [shape.length - 1, 0];
+}
+
+export function rowColToFlat(r: number, c: number, shape: number[]): number {
+  let i = 0;
+  for (let row = 0; row < r; row++) i += shape[row];
+  return i + c;
 }
