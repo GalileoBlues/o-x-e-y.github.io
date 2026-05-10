@@ -1,4 +1,4 @@
-import { HashRouter, Route } from "@solidjs/router";
+import { Router, Route } from "@solidjs/router";
 import Home from "./pages/Home";
 import Playground from "./pages/Playground";
 import Noctum from "./pages/layouts/Noctum";
@@ -13,7 +13,7 @@ import Sturdy from "./pages/layouts/Sturdy";
 
 export default function App() {
   return (
-    <HashRouter>
+    <Router>
       <Route path="/" component={Home} />
       <Route path="/playground" component={Playground} />
       <Route path="/layouts/noctum" component={Noctum} />
@@ -25,6 +25,6 @@ export default function App() {
       <Route path="/layouts/hands-up" component={HandsUp} />
       <Route path="/layouts/stronk" component={Stronk} />
       <Route path="/layouts/sturdy" component={Sturdy} />
-    </HashRouter>
+    </Router>
   );
 }
